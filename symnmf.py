@@ -7,15 +7,19 @@ import numpy as np
 np.random.seed(1234)
 
 
-def isNumValid(s):
+def isNumValid(text):
     # Accept the integer notation used in HW1, including +2 and 2.000.
-    if s.startswith("+"):
-        s = s[1:]
-    whole, dot, fraction = s.partition(".")
-    if not whole or any(ch < "0" or ch > "9" for ch in whole):
+    if text.startswith("+"):
+        text = text[1:]
+    whole, _, fraction = text.partition(".")
+    if not whole:
         return None
-    if dot and any(ch != "0" for ch in fraction):
-        return None
+    for digit in whole:
+        if digit < "0" or digit > "9":
+            return None
+    for digit in fraction:
+        if digit != "0":
+            return None
     try:
         return int(whole)
     except ValueError:
@@ -53,8 +57,8 @@ def read_points(lines):
 
 def read_data(file_name):
     # Load the input vectors from a text file.
-    with open(file_name, "r") as input_file:
-        return read_points(input_file)
+    with open(file_name, "r") as inputFile:
+        return read_points(inputFile)
 
 
 def factorize(points, k):
@@ -62,10 +66,10 @@ def factorize(points, k):
     import symnmfmodule
 
     w = symnmfmodule.norm(points)
-    initial_h = np.random.uniform(
+    initialH = np.random.uniform(
         0, 2 * np.sqrt(np.mean(w) / k), (len(points), k)
     )
-    return symnmfmodule.symnmf(initial_h.tolist(), w)
+    return symnmfmodule.symnmf(initialH.tolist(), w)
 
 
 def calculate_matrix(points, k, goal):
@@ -93,14 +97,16 @@ def main():
     # Validate command-line input and print the requested matrix.
     try:
         if len(sys.argv) != 4:
-            raise ValueError("Incorrect argument count")
+            print("An Error Has Occurred")
+            return 1
         k = parse_k(sys.argv[1])
         if k is None:
             print("Incorrect number of clusters!")
             return 1
         goal = sys.argv[2]
         if goal not in ("symnmf", "sym", "ddg", "norm"):
-            raise ValueError("Unknown goal")
+            print("An Error Has Occurred")
+            return 1
         points = read_data(sys.argv[3])
         k = parse_k(sys.argv[1], len(points))
         if k is None:

@@ -73,24 +73,24 @@ static double *row_degrees(double **a, int n)
 /* Return a diagonal matrix containing the similarity row sums. */
 double **ddg(double **points, int n, int dim)
 {
-    double **a;
     double **d;
+    double degree;
     int i;
     int j;
 
-    a = sym(points, n, dim);
-    if (a == NULL) {
+    d = sym(points, n, dim);
+    if (d == NULL) {
         return NULL;
     }
-    d = create_matrix(n, n);
-    if (d != NULL) {
-        for (i = 0; i < n; i++) {
-            for (j = 0; j < n; j++) {
-                d[i][i] += a[i][j];
-            }
+    /* Reuse each similarity row after summing its entries. */
+    for (i = 0; i < n; i++) {
+        degree = 0.0;
+        for (j = 0; j < n; j++) {
+            degree += d[i][j];
+            d[i][j] = 0.0;
         }
+        d[i][i] = degree;
     }
-    free_matrix(a, n);
     return d;
 }
 

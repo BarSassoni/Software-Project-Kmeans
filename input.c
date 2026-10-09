@@ -101,10 +101,14 @@ static int parse_row(char *line, double *row, int dim)
         while (isspace((unsigned char)*end)) {
             end++;
         }
-        if ((i + 1 < dim && *end != ',') || (i + 1 == dim && *end != '\0')) {
+        if (i + 1 < dim) {
+            if (*end != ',') {
+                return 0;
+            }
+            line = end + 1;
+        } else if (*end != '\0') {
             return 0;
         }
-        line = end + (i + 1 < dim);
     }
     return 1;
 }
@@ -166,12 +170,13 @@ static int append_row(Data *data, char *line)
         return 0;
     }
     data->dim = dim;
-    data->points[data->n++] = row;
+    data->points[data->n] = row;
+    data->n++;
     return 1;
 }
 
 /* Read rectangular CSV data, including CRLF and a missing final newline. */
-double **read_points(const char *file_name, int *n, int *dim)
+double **read_points(const char *fileName, int *n, int *dim)
 {
     FILE *file;
     Data data;
@@ -179,7 +184,7 @@ double **read_points(const char *file_name, int *n, int *dim)
     size_t capacity;
     int status;
 
-    file = fopen(file_name, "r");
+    file = fopen(fileName, "r");
     if (file == NULL) {
         return NULL;
     }

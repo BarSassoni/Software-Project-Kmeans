@@ -179,12 +179,17 @@ static PyObject *py_norm(PyObject *self, PyObject *args)
     return calculate(args, norm);
 }
 
-/* Validate both matrices before running the optimization in C. */
-static PyObject *optimize(PyObject *hlist, PyObject *wlist)
+/* Validate H and W, then run the optimization in C. */
+static PyObject *py_symnmf(PyObject *self, PyObject *args)
 {
+    PyObject *hlist, *wlist;
     double **h, **w, **result;
     int n, k, rows, cols;
 
+    (void)self;
+    if (!PyArg_ParseTuple(args, "OO", &hlist, &wlist)) {
+        return set_error(PyExc_ValueError);
+    }
     h = read_matrix(hlist, &n, &k, 1);
     if (h == NULL) {
         return NULL;
@@ -205,19 +210,7 @@ static PyObject *optimize(PyObject *hlist, PyObject *wlist)
     return write_matrix(result, n, k);
 }
 
-/* Optimize the initial H against the supplied normalized matrix W. */
-static PyObject *py_symnmf(PyObject *self, PyObject *args)
-{
-    PyObject *hlist, *wlist;
-
-    (void)self;
-    if (!PyArg_ParseTuple(args, "OO", &hlist, &wlist)) {
-        return set_error(PyExc_ValueError);
-    }
-    return optimize(hlist, wlist);
-}
-
-static PyMethodDef symnmf_methods[] = {
+static PyMethodDef symnmfMethods[] = {
     {"sym", py_sym, METH_VARARGS, "Return the similarity matrix of points."},
     {"ddg", py_ddg, METH_VARARGS, "Return the diagonal degree matrix."},
     {"norm", py_norm, METH_VARARGS, "Return the normalized similarity matrix."},
@@ -225,12 +218,12 @@ static PyMethodDef symnmf_methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
-static struct PyModuleDef symnmf_module = {
+static struct PyModuleDef symnmfModule = {
     PyModuleDef_HEAD_INIT,
     "symnmfmodule",
     "C calculations for symmetric nonnegative matrix factorization.",
     -1,
-    symnmf_methods,
+    symnmfMethods,
     NULL,
     NULL,
     NULL,
@@ -240,5 +233,5 @@ static struct PyModuleDef symnmf_module = {
 /* Initialize the Python extension module. */
 PyMODINIT_FUNC PyInit_symnmfmodule(void)
 {
-    return PyModule_Create(&symnmf_module);
+    return PyModule_Create(&symnmfModule);
 }

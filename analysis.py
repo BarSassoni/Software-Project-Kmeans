@@ -13,20 +13,21 @@ def compare_clusterings(points, k):
     from sklearn.metrics import adjusted_rand_score, silhouette_score
 
     h = factorize(points, k)
-    nmf_labels = np.argmax(h, axis=1)
+    nmfLabels = np.argmax(h, axis=1)
     centroids = kmeans.fit(points, k)
-    kmeans_labels = kmeans.predict(points, centroids)
-    nmf_score = silhouette_score(points, nmf_labels)
-    kmeans_score = silhouette_score(points, kmeans_labels)
-    ari = adjusted_rand_score(nmf_labels, kmeans_labels)
-    return nmf_score, kmeans_score, ari
+    kmeansLabels = kmeans.predict(points, centroids)
+    nmfScore = silhouette_score(points, nmfLabels)
+    kmeansScore = silhouette_score(points, kmeansLabels)
+    ari = adjusted_rand_score(nmfLabels, kmeansLabels)
+    return nmfScore, kmeansScore, ari
 
 
 def main():
     # Read k and a filename, then print the three required scores.
     try:
         if len(sys.argv) != 3:
-            raise ValueError("Incorrect argument count")
+            print("An Error Has Occurred")
+            return 1
         k = parse_k(sys.argv[1])
         if k is None:
             print("Incorrect number of clusters!")
@@ -36,9 +37,9 @@ def main():
         if k is None:
             print("Incorrect number of clusters!")
             return 1
-        nmf_score, kmeans_score, ari = compare_clusterings(points, k)
-        print("nmf: %.4f" % nmf_score)
-        print("kmeans: %.4f" % kmeans_score)
+        nmfScore, kmeansScore, ari = compare_clusterings(points, k)
+        print("nmf: %.4f" % nmfScore)
+        print("kmeans: %.4f" % kmeansScore)
         print("ari: %.4f" % ari)
         return 0
     except Exception:
