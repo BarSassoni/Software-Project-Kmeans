@@ -54,13 +54,13 @@ def read_points(lines):
 
 
 def read_data(file_name):
-    # Load the input vectors from a text file.
+    # load vectors from file
     with open(file_name, "r") as inputFile:
         return read_points(inputFile)
 
 
 def factorize(points, k):
-    # Initialize H in Python and optimize it using the C extension.
+    # create H and optimize using C module
     import symnmfmodule
 
     w = symnmfmodule.norm(points)
@@ -71,7 +71,7 @@ def factorize(points, k):
 
 
 def calculate_matrix(points, k, goal):
-    # Send each goal to the corresponding C extension method.
+    # send goal to matching C method
     import symnmfmodule
 
     if goal == "symnmf":
