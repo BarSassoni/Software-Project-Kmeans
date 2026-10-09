@@ -1,5 +1,3 @@
-# Python interface for the SymNMF C implementation.
-
 import math
 import sys
 import numpy as np
@@ -8,7 +6,7 @@ np.random.seed(1234)
 
 
 def isNumValid(text):
-    # Accept the integer notation used in HW1, including +2 and 2.000.
+    # check if num is valid
     if text.startswith("+"):
         text = text[1:]
     whole, _, fraction = text.partition(".")
@@ -27,7 +25,7 @@ def isNumValid(text):
 
 
 def parse_k(text, n=None):
-    # Return the cluster count, or None if it violates the HW1 bounds.
+    # check if k is valid (as in HW1)
     k = isNumValid(text)
     if k is None or k <= 1 or (n is not None and k >= n):
         return None
@@ -35,7 +33,7 @@ def parse_k(text, n=None):
 
 
 def read_points(lines):
-    # Read comma-separated, finite vectors, ignoring empty lines.
+    # read vectors, ignore the empty lines
     points = []
     dimension = None
     for line in lines:
