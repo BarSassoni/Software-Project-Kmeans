@@ -1,15 +1,15 @@
-"""Compare SymNMF and the HW1 K-means implementation."""
+# Compare SymNMF and the HW1 K-means implementation.
 
 import sys
 import numpy as np
 import kmeans
-from symnmf import ClusterError, factorize, parse_k, read_data
+from symnmf import factorize, parse_k, read_data
 
 np.random.seed(1234)
 
 
 def compare_clusterings(points, k):
-    """Return both silhouette scores and their adjusted Rand index."""
+    # Return both silhouette scores and their adjusted Rand index.
     from sklearn.metrics import adjusted_rand_score, silhouette_score
 
     h = factorize(points, k)
@@ -23,20 +23,24 @@ def compare_clusterings(points, k):
 
 
 def main():
-    """Read k and a filename, then print the three required scores."""
+    # Read k and a filename, then print the three required scores.
     try:
         if len(sys.argv) != 3:
             raise ValueError("Incorrect argument count")
         k = parse_k(sys.argv[1])
+        if k is None:
+            print("Incorrect number of clusters!")
+            return 1
         points = read_data(sys.argv[2])
         k = parse_k(sys.argv[1], len(points))
+        if k is None:
+            print("Incorrect number of clusters!")
+            return 1
         nmf_score, kmeans_score, ari = compare_clusterings(points, k)
         print("nmf: %.4f" % nmf_score)
         print("kmeans: %.4f" % kmeans_score)
         print("ari: %.4f" % ari)
         return 0
-    except ClusterError:
-        print("Incorrect number of clusters!")
     except Exception:
         print("An Error Has Occurred")
     return 1

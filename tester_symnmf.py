@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
-"""Standalone tester for this SymNMF project. Run: python3 tester_symnmf.py
-
-Adapted test design and 44 case configurations from avivjan/TAU_Testers:
-https://github.com/avivjan/TAU_Testers/blob/main/SoftwareProject/compareTester.sh
-Upstream blob inspected: d7d57424e748bbbeca46a6bfe8953303a301bf14
-
-Rewritten Python tester, not the original shell script. Independent NumPy
-references replace Prev_final_100. Uses epsilon=1e-4, max_iter=300, seed=1234,
-and checks both Silhouette scores plus ARI. Expected answers never use the
-project's own functions. No make, sudo, network access, or automatic installs.
-Builds a source-only temporary copy; original files are not changed/deleted.
-Requires Linux/macOS, gcc, Python development headers, setuptools, numpy,
-and scikit-learn. Valgrind checks standalone C if available; otherwise SKIP.
-Undefined Silhouette cases are SKIP, never a false PASS.
-Exit: 0=all executed checks passed, 1=test failure, 2=setup/tester error.
-For local use only; do not include this file in the assignment submission.
-"""
+# Standalone tester for this SymNMF project. Run: python3 tester_symnmf.py
+#
+# Adapted test design and 44 case configurations from avivjan/TAU_Testers:
+# https://github.com/avivjan/TAU_Testers/blob/main/SoftwareProject/compareTester.sh
+# Upstream blob inspected: d7d57424e748bbbeca46a6bfe8953303a301bf14
+#
+# Rewritten Python tester, not the original shell script. Independent NumPy
+# references replace Prev_final_100. Uses epsilon=1e-4, max_iter=300, seed=1234,
+# and checks both Silhouette scores plus ARI. Expected answers never use the
+# project's own functions. No make, sudo, network access, or automatic installs.
+# Builds a source-only temporary copy; original files are not changed/deleted.
+# Requires Linux/macOS, gcc, Python development headers, setuptools, numpy,
+# and scikit-learn. Valgrind checks standalone C if available; otherwise SKIP.
+# Undefined Silhouette cases are SKIP, never a false PASS.
+# Exit: 0=all executed checks passed, 1=test failure, 2=setup/tester error.
+# For local use only; do not include this file in the assignment submission.
 import argparse
 import importlib
 import json
@@ -353,7 +352,7 @@ def run_suite(tester, seed):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(description="Standalone tester for this SymNMF project.", formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--project", type=Path, default=Path(__file__).resolve().parent,
                         help="Folder containing your source files (default: folder of this tester)")
     parser.add_argument("--seed", type=int, default=2026, help="Reproducible test-data seed")

@@ -1,4 +1,4 @@
-"""HW1 K-means, refactored for reuse with the project's convergence limits."""
+# HW1 K-means, refactored for reuse with the project's convergence limits.
 
 import sys
 
@@ -7,7 +7,7 @@ iters = 300
 
 
 def squared_distance(point, centroid):
-    """Compute squared Euclidean distance as in HW1."""
+    # Compute squared Euclidean distance as in HW1.
     distance = 0.0
     for j in range(len(point)):
         distance += (point[j] - centroid[j]) ** 2
@@ -15,7 +15,7 @@ def squared_distance(point, centroid):
 
 
 def closest_centroid(point, centroids):
-    """Return the first closest centroid, preserving the HW1 tie rule."""
+    # Return the first closest centroid, preserving the HW1 tie rule.
     minidx = 0
     min_dist = squared_distance(point, centroids[0])
     for i in range(1, len(centroids)):
@@ -27,12 +27,12 @@ def closest_centroid(point, centroids):
 
 
 def predict(points, centroids):
-    """Assign each vector to its nearest final centroid."""
+    # Assign each vector to its nearest final centroid.
     return [closest_centroid(point, centroids) for point in points]
 
 
 def update_centroids(points, centroids):
-    """Average each cluster; keep the old centroid for an empty cluster."""
+    # Average each cluster; keep the old centroid for an empty cluster.
     clusters = [[] for _ in centroids]
     for point in points:
         clusters[closest_centroid(point, centroids)].append(point)
@@ -53,7 +53,7 @@ def update_centroids(points, centroids):
 
 
 def fit(points, k, max_iter=iters, eps=epsilon):
-    """Run HW1 K-means, starting from the first k input vectors."""
+    # Run HW1 K-means, starting from the first k input vectors.
     centroids = [points[i][:] for i in range(k)]
     for _ in range(max_iter):
         new_centroids = update_centroids(points, centroids)
@@ -68,14 +68,17 @@ def fit(points, k, max_iter=iters, eps=epsilon):
 
 
 def main():
-    """Keep the HW1 stdin interface, with project defaults for convergence."""
-    from symnmf import ClusterError, isNumValid, parse_k
+    # Keep the HW1 stdin interface, with project defaults for convergence.
+    from symnmf import isNumValid, parse_k
     from symnmf import print_matrix, read_points
 
     try:
         if len(sys.argv) not in (2, 3):
             raise ValueError("Incorrect argument count")
         k = parse_k(sys.argv[1])
+        if k is None:
+            print("Incorrect number of clusters!")
+            return 1
         max_iter = iters
         if len(sys.argv) == 3:
             max_iter = isNumValid(sys.argv[2])
@@ -84,10 +87,11 @@ def main():
                 return 1
         points = read_points(sys.stdin)
         k = parse_k(sys.argv[1], len(points))
+        if k is None:
+            print("Incorrect number of clusters!")
+            return 1
         print_matrix(fit(points, k, max_iter))
         return 0
-    except ClusterError:
-        print("Incorrect number of clusters!")
     except Exception:
         print("An Error Has Occurred")
     return 1
