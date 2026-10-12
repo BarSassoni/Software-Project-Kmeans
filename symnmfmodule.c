@@ -172,7 +172,7 @@ static PyObject *py_norm(PyObject *self, PyObject *args)
     return calculate(args, norm);
 }
 
-/* check H and W vals (nxk, nxn) and run optimization in C (also no memory leak) */
+/* check H and W vals (nxk, nxn) and optimization in C */
 static PyObject *py_symnmf(PyObject *self, PyObject *args)
 {
     PyObject *hlist, *wlist;
