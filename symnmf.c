@@ -13,7 +13,7 @@
 #define MAX_ITER 300
 #define BETA 0.5
 
-/* Squared Euclidean distance between two points. */
+/* calculate square euclidean distance */
 static double distance_squared(double *a, double *b, int dim)
 {
     double sum;
@@ -28,7 +28,7 @@ static double distance_squared(double *a, double *b, int dim)
     return sum;
 }
 
-/* Return the symmetric similarity matrix with a zero diagonal. */
+/* return symmetric similarity matrix (a zero diagonal) */
 double **sym(double **points, int n, int dim)
 {
     double **a;
@@ -51,7 +51,7 @@ double **sym(double **points, int n, int dim)
     return a;
 }
 
-/* Sum each row to find its degree. */
+/* sum rows to find degree */
 static double *row_degrees(double **a, int n)
 {
     double *degrees;
@@ -70,7 +70,7 @@ static double *row_degrees(double **a, int n)
     return degrees;
 }
 
-/* Return a diagonal matrix containing the similarity row sums. */
+/* return a diagonal matrix with the similarity row sums */
 double **ddg(double **points, int n, int dim)
 {
     double **d;
@@ -82,7 +82,7 @@ double **ddg(double **points, int n, int dim)
     if (d == NULL) {
         return NULL;
     }
-    /* Reuse each similarity row after summing its entries. */
+    /* use similarity row after summing the entries */
     for (i = 0; i < n; i++) {
         degree = 0.0;
         for (j = 0; j < n; j++) {
@@ -94,7 +94,7 @@ double **ddg(double **points, int n, int dim)
     return d;
 }
 
-/* Zero degrees, including numerical underflow, leave a zero row/column. */
+/* zero degrees, leave zero row or column */
 double **norm(double **points, int n, int dim)
 {
     double **a;
@@ -126,7 +126,7 @@ double **norm(double **points, int n, int dim)
     return a;
 }
 
-/* Compute H transpose times H without forming a transpose. */
+/* calculate H^t * H */
 static void gram_matrix(double **h, double **gram, int n, int k)
 {
     int i;
@@ -146,7 +146,7 @@ static void gram_matrix(double **h, double **gram, int n, int k)
     }
 }
 
-/* Multiply a row by one column. */
+/* multiply row with column. */
 static double row_product(double *row, double **mat, int col, int length)
 {
     double sum;
@@ -159,7 +159,7 @@ static double row_product(double *row, double **mat, int col, int length)
     return sum;
 }
 
-/* Apply one simultaneous update. Zero entries stay zero. */
+/* simultaneou update, zeros stay zero */
 static int update_h(double **h, double **next, double **w, double **gram,
                     int n, int k, double *change)
 {
@@ -193,7 +193,7 @@ static int update_h(double **h, double **next, double **w, double **gram,
     return *change <= DBL_MAX;
 }
 
-/* Copy values while keeping ownership of both matrices unchanged. */
+/* copy values to target matrix */
 static void copy_matrix(double **source, double **target, int n, int k)
 {
     int i;
@@ -206,7 +206,7 @@ static void copy_matrix(double **source, double **target, int n, int k)
     }
 }
 
-/* Return a new H; the caller retains the unchanged input matrices. */
+/* return new H */
 double **symnmf(double **h, double **w, int n, int k)
 {
     double **current;
@@ -227,12 +227,14 @@ double **symnmf(double **h, double **w, int n, int k)
     }
     copy_matrix(h, current, n, k);
     for (iter = 0; iter < MAX_ITER; iter++) {
+        /* calculate H^T H for the update step */
         gram_matrix(current, gram, n, k);
         if (!update_h(current, next, w, gram, n, k, &change)) {
             free_matrix(current, n);
             current = NULL;
             break;
         }
+        /* use updated H and old matrix in next iteration */
         tmp = current;
         current = next;
         next = tmp;
@@ -246,7 +248,7 @@ double **symnmf(double **h, double **w, int n, int k)
 }
 
 #ifndef SYMNMF_EXTENSION
-/* Select the requested matrix calculation. */
+/* select matrix calculation */
 static double **calculate_goal(char *goal, double **points, int n, int dim)
 {
     if (strcmp(goal, "sym") == 0) {
@@ -261,7 +263,7 @@ static double **calculate_goal(char *goal, double **points, int n, int dim)
     return NULL;
 }
 
-/* Read the data, calculate the goal and print four decimal places. */
+/* read data, calculate goal and print 4 decimal places */
 int main(int argc, char *argv[])
 {
     double **points;
