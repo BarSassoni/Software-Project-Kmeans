@@ -13,26 +13,15 @@
 #define MAX_ITER 300
 #define BETA 0.5
 
-/* calculate square euclidean dist */
-static double distance_squared(double *a, double *b, int dim)
-{
-    double sum;
-    double diff;
-    int i;
-    sum = 0.0;
-    for (i = 0; i < dim; i++) {
-        diff = a[i] - b[i];
-        sum += diff * diff;
-    }
-    return sum;
-}
-
 /* symmetric similarity matrix 0's diag */
 double **sym(double **points, int n, int dim)
 {
     double **a;
+    double sum;
+    double diff;
     int i;
     int j;
+    int d;
     if (points == NULL || n <= 0 || dim <= 0) {
         return NULL;
     }
@@ -42,7 +31,12 @@ double **sym(double **points, int n, int dim)
     }
     for (i = 0; i < n; i++) {
         for (j = i + 1; j < n; j++) {
-            a[i][j] = exp(-distance_squared(points[i], points[j], dim) / 2.0);
+            sum = 0.0;
+            for (d = 0; d < dim; d++) {
+                diff = points[i][d] - points[j][d];
+                sum += diff * diff;
+            }
+            a[i][j] = exp(-sum / 2.0);
             a[j][i] = a[i][j];
         }
     }
