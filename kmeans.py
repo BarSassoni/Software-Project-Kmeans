@@ -25,35 +25,28 @@ def closest_centroid(point, centroids):
     return closestIndex
 
 
-def predict(points, centroids):
-    # match vector to final centroid
-    return [closest_centroid(point, centroids) for point in points]
-
-def update_centroids(points, centroids):
-    # avg cluster, and keep old centroid for empty cluster
-    clusters = [[] for _ in centroids]
-    for point in points:
-        clusterIndex = closest_centroid(point, centroids)
-        clusters[clusterIndex].append(point)
-    newCentroids = []
-    for i, cluster in enumerate(clusters):
-        if not cluster:
-            newCentroids.append(centroids[i][:])
-            continue
-        newCentroid = []
-        for j in range(len(centroids[i])):
-            total = 0.0
-            for point in cluster:
-                total += point[j]
-            newCentroid.append(total / len(cluster))
-        newCentroids.append(newCentroid)
-    return newCentroids
-
 def fit(points, k, max_iter=iters, eps=epsilon):
     # running HW1 Kmeans, starting from the first k input vectors
     centroids = [points[i][:] for i in range(k)]
     for _ in range(max_iter):
-        newCentroids = update_centroids(points, centroids)
+        clusters = [[] for _ in centroids]
+        for point in points:
+            clusterIndex = closest_centroid(point, centroids)
+            clusters[clusterIndex].append(point)
+
+        newCentroids = []
+        for i, cluster in enumerate(clusters):
+            if not cluster:
+                newCentroids.append(centroids[i][:])
+                continue
+            newCentroid = []
+            for j in range(len(centroids[i])):
+                total = 0.0
+                for point in cluster:
+                    total += point[j]
+                newCentroid.append(total / len(cluster))
+            newCentroids.append(newCentroid)
+
         converged = True
         for i in range(k):
             if squared_distance(newCentroids[i], centroids[i]) >= eps ** 2:

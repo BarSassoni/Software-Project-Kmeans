@@ -70,21 +70,6 @@ def factorize(points, k):
     return symnmfmodule.symnmf(initialH.tolist(), w)
 
 
-def calculate_matrix(points, k, goal):
-    # send goal to matching C method
-    import symnmfmodule
-
-    if goal == "symnmf":
-        return factorize(points, k)
-    if goal == "sym":
-        return symnmfmodule.sym(points)
-    if goal == "ddg":
-        return symnmfmodule.ddg(points)
-    if goal == "norm":
-        return symnmfmodule.norm(points)
-    raise ValueError("Unknown goal")
-
-
 def print_matrix(matrix):
     # print the matrix
     for row in matrix:
@@ -110,7 +95,16 @@ def main():
         if k is None:
             print("Incorrect number of clusters!")
             return 1
-        print_matrix(calculate_matrix(points, k, goal))
+        import symnmfmodule
+        if goal == "symnmf":
+            result = factorize(points, k)
+        elif goal == "sym":
+            result = symnmfmodule.sym(points)
+        elif goal == "ddg":
+            result = symnmfmodule.ddg(points)
+        elif goal == "norm":
+            result = symnmfmodule.norm(points)
+        print_matrix(result)
         return 0
     except Exception:
         print("An Error Has Occurred")

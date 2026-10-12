@@ -26,7 +26,7 @@ def main():
         h = factorize(points, k)
         nmfLabels = np.argmax(h, axis=1)
         centroids = kmeans.fit(points, k)
-        kmeansLabels = kmeans.predict(points, centroids)
+        kmeansLabels = [kmeans.closest_centroid(point, centroids) for point in points]
         nmfScore = silhouette_score(points, nmfLabels)
         kmeansScore = silhouette_score(points, kmeansLabels)
         ari = adjusted_rand_score(nmfLabels, kmeansLabels)
