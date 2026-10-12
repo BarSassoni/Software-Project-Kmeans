@@ -86,13 +86,13 @@ def calculate_matrix(points, k, goal):
 
 
 def print_matrix(matrix):
-    # Print one row per line using the required precision.
+    # print the matrix
     for row in matrix:
         print(",".join("%.4f" % value for value in row))
 
 
 def main():
-    # Validate command-line input and print the requested matrix.
+    # get input and print the matrix
     try:
         if len(sys.argv) != 4:
             print("An Error Has Occurred")
