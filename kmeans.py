@@ -1,4 +1,4 @@
-# HW1 K-means, refactored for reuse with the project's convergence limits.
+# HW1 Kmeans code with minor changes (adjusted)
 
 import sys
 
@@ -7,7 +7,7 @@ iters = 300
 
 
 def squared_distance(point, centroid):
-    # Compute squared Euclidean distance as in HW1.
+    # calculate squared euclidean distance
     distance = 0.0
     for j in range(len(point)):
         distance += (point[j] - centroid[j]) ** 2
@@ -15,7 +15,7 @@ def squared_distance(point, centroid):
 
 
 def closest_centroid(point, centroids):
-    # Return the first closest centroid, preserving the HW1 tie rule.
+    # return the first closest centroid
     closestIndex = 0
     closestDistance = squared_distance(point, centroids[0])
     for i in range(1, len(centroids)):
@@ -27,12 +27,12 @@ def closest_centroid(point, centroids):
 
 
 def predict(points, centroids):
-    # Assign each vector to its nearest final centroid.
+    # match vector to final centroid
     return [closest_centroid(point, centroids) for point in points]
 
 
 def update_centroids(points, centroids):
-    # Average each cluster; keep the old centroid for an empty cluster.
+    # avg cluster, and keep old centroid for empty cluster
     clusters = [[] for _ in centroids]
     for point in points:
         clusterIndex = closest_centroid(point, centroids)
@@ -53,7 +53,7 @@ def update_centroids(points, centroids):
 
 
 def fit(points, k, max_iter=iters, eps=epsilon):
-    # Run HW1 K-means, starting from the first k input vectors.
+    # running HW1 Kmeans, starting from the first k input vectors
     centroids = [points[i][:] for i in range(k)]
     for _ in range(max_iter):
         newCentroids = update_centroids(points, centroids)
@@ -68,7 +68,7 @@ def fit(points, k, max_iter=iters, eps=epsilon):
 
 
 def main():
-    # Keep the HW1 stdin interface, with project defaults for convergence.
+    # keep HW1 stdin interface, with project defaults for convergence
     from symnmf import isNumValid, parse_k
     from symnmf import print_matrix, read_points
 
