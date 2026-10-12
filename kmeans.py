@@ -1,5 +1,4 @@
 # the HW1 kmeans code with small changes for this project
-
 import sys
 
 epsilon = 0.0001
@@ -11,7 +10,6 @@ def squared_distance(point, centroid):
     for j in range(len(point)):
         distance += (point[j] - centroid[j]) ** 2
     return distance
-
 
 def closest_centroid(point, centroids):
     # return the first closest centroid
@@ -46,7 +44,6 @@ def fit(points, k, max_iter=iters, eps=epsilon):
                     total += point[j]
                 newCentroid.append(total / len(cluster))
             newCentroids.append(newCentroid)
-
         converged = True
         for i in range(k):
             if squared_distance(newCentroids[i], centroids[i]) >= eps ** 2:
