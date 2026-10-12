@@ -13,17 +13,17 @@ typedef struct {
     int capacity;
 } Data;
 
-/* increase line buffer */
+/* increase linebuffer */
 static int grow_line(char **line, size_t *capacity)
 {
     char *tmp;
     size_t next;
-
     if (*capacity > (size_t)-1 / 2) {
         return 0;
     }
     next = *capacity == 0 ? 128 : *capacity * 2;
     tmp = (char *)realloc(*line, next);
+    /*tmp אם keep original memory if realloc fail */
     if (tmp == NULL) {
         return 0;
     }
@@ -37,7 +37,6 @@ static int read_line(FILE *file, char **line, size_t *capacity)
 {
     size_t length;
     int c;
-
     length = 0;
     while ((c = fgetc(file)) != EOF && c != '\n') {
         if (c == '\0') {
@@ -92,6 +91,7 @@ static int parse_row(char *line, double *row, int dim)
             return 0;
         }
         value = strtod(line, &end);
+        /*a value != value for type check, other check for infin and fail conversion */
         if (end == line || value != value || value > DBL_MAX || value < -DBL_MAX) {
             return 0;
         }
