@@ -33,7 +33,7 @@ def parse_k(text, n=None):
 
 
 def read_points(lines):
-    # read vectors, ignore the empty lines
+    # reading vectors ignoring empty lines
     points = []
     dimension = None
     for line in lines:
