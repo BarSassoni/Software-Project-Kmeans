@@ -86,31 +86,11 @@ static double **read_matrix(PyObject *list, int *rows, int *cols, int nonnegativ
     return mat;
 }
 
-/* make a python row*/
-static PyObject *write_row(double *values, int cols)
-{
-    PyObject *row, *value;
-    int j;
-    row = PyList_New(cols);
-    if (row == NULL) {
-        return set_error(PyExc_MemoryError);
-    }
-    for (j = 0; j < cols; j++) {
-        value = PyFloat_FromDouble(values[j]);
-        if (value == NULL) {
-            Py_DECREF(row);
-            return set_error(PyExc_MemoryError);
-        }
-        PyList_SET_ITEM(row, j, value);
-    }
-    return row;
-}
-
 /* convert a result to python (releasing matching C storage :) ) */
 static PyObject *write_matrix(double **mat, int rows, int cols)
 {
-    PyObject *result, *row;
-    int i;
+    PyObject *result, *row, *value;
+    int i, j;
     if (mat == NULL) {
         return set_error(PyExc_RuntimeError);
     }
@@ -120,13 +100,22 @@ static PyObject *write_matrix(double **mat, int rows, int cols)
         return set_error(PyExc_MemoryError);
     }
     for (i = 0; i < rows; i++) {
-        row = write_row(mat[i], cols);
+        row = PyList_New(cols);
         if (row == NULL) {
             Py_DECREF(result);
             free_matrix(mat, rows);
-            return NULL;
+            return set_error(PyExc_MemoryError);
         }
         PyList_SET_ITEM(result, i, row);
+        for (j = 0; j < cols; j++) {
+            value = PyFloat_FromDouble(mat[i][j]);
+            if (value == NULL) {
+                Py_DECREF(result);
+                free_matrix(mat, rows);
+                return set_error(PyExc_MemoryError);
+            }
+            PyList_SET_ITEM(row, j, value);
+        }
     }
     free_matrix(mat, rows);
     return result;
