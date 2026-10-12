@@ -13,13 +13,12 @@
 #define MAX_ITER 300
 #define BETA 0.5
 
-/* calculate square euclidean distance */
+/* calculate square euclidean dist */
 static double distance_squared(double *a, double *b, int dim)
 {
     double sum;
     double diff;
     int i;
-
     sum = 0.0;
     for (i = 0; i < dim; i++) {
         diff = a[i] - b[i];
@@ -34,7 +33,6 @@ double **sym(double **points, int n, int dim)
     double **a;
     int i;
     int j;
-
     if (points == NULL || n <= 0 || dim <= 0) {
         return NULL;
     }
@@ -70,7 +68,7 @@ static double *row_degrees(double **a, int n)
     return degrees;
 }
 
-/* return a diagonal matrix with the similarity row sums */
+/* return diagonal matrix with similarity row sums */
 double **ddg(double **points, int n, int dim)
 {
     double **d;
@@ -82,7 +80,7 @@ double **ddg(double **points, int n, int dim)
     if (d == NULL) {
         return NULL;
     }
-    /* use similarity row after summing the entries */
+    /* similarity row after entries sum */
     for (i = 0; i < n; i++) {
         degree = 0.0;
         for (j = 0; j < n; j++) {
@@ -125,7 +123,7 @@ double **norm(double **points, int n, int dim)
     return a;
 }
 
-/* calculate H^t * H */
+/* calculation H^t * H */
 static void gram_matrix(double **h, double **gram, int n, int k)
 {
     int i;
@@ -145,7 +143,7 @@ static void gram_matrix(double **h, double **gram, int n, int k)
     }
 }
 
-/*multiply row with column */
+/*multiply row with col */
 static double row_product(double *row, double **mat, int col, int length)
 {
     double sum;
@@ -158,7 +156,7 @@ static double row_product(double *row, double **mat, int col, int length)
     return sum;
 }
 
-/* simultaneou update, zeros stay zero */
+/* simultaneou update and zeros stay zeros */
 static int update_h(double **h, double **next, double **w, double **gram, int n, int k, double *change)
 {
     int i;
@@ -191,7 +189,7 @@ static int update_h(double **h, double **next, double **w, double **gram, int n,
     return *change <= DBL_MAX;
 }
 
-/* copy values to target matrix*/
+/*copy values to target matrix */
 static void copy_matrix(double **source, double **target, int n, int k)
 {
     int i;
