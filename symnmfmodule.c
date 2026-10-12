@@ -42,34 +42,13 @@ static int matrix_shape(PyObject *list, int *rows, int *cols)
     return 1;
 }
 
-/* copy a rectangular list (with valid vals) */
-static int copy_values(PyObject *list, double **mat, int rows, int cols, int nonnegative)
-{
-    PyObject *row;
-    double value;
-    int i, j;
-    for (i = 0; i < rows; i++) {
-        row = PyList_GET_ITEM(list, i);
-        if (!PyList_Check(row) || PyList_GET_SIZE(row) != cols) {
-            set_error(PyExc_ValueError);
-            return 0;
-        }
-        for (j = 0; j < cols; j++) {
-            value = PyFloat_AsDouble(PyList_GET_ITEM(row, j));
-        if (PyErr_Occurred() || value != value ||value > DBL_MAX || value < -DBL_MAX ||(nonnegative && value < 0.0)) {
-        set_error(PyExc_ValueError);
-                return 0;
-            }
-            mat[i][j] = value;
-        }
-    }
-    return 1;
-}
-
 /* allocat a C copy */
 static double **read_matrix(PyObject *list, int *rows, int *cols, int nonnegative)
 {
     double **mat;
+    PyObject *row;
+    double value;
+    int i, j;
 
     if (!matrix_shape(list, rows, cols)) {
         return NULL;
@@ -79,9 +58,23 @@ static double **read_matrix(PyObject *list, int *rows, int *cols, int nonnegativ
         set_error(PyExc_MemoryError);
         return NULL;
     }
-    if (!copy_values(list, mat, *rows, *cols, nonnegative)) {
-        free_matrix(mat, *rows);
-        return NULL;
+    for (i = 0; i < *rows; i++) {
+        row = PyList_GET_ITEM(list, i);
+        if (!PyList_Check(row) || PyList_GET_SIZE(row) != *cols) {
+            free_matrix(mat, *rows);
+            set_error(PyExc_ValueError);
+            return NULL;
+        }
+        for (j = 0; j < *cols; j++) {
+            value = PyFloat_AsDouble(PyList_GET_ITEM(row, j));
+            if (PyErr_Occurred() || value != value || value > DBL_MAX ||
+                value < -DBL_MAX || (nonnegative && value < 0.0)) {
+                free_matrix(mat, *rows);
+                set_error(PyExc_ValueError);
+                return NULL;
+            }
+            mat[i][j] = value;
+        }
     }
     return mat;
 }
