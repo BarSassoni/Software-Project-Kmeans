@@ -1,5 +1,3 @@
-# Compare SymNMF and the HW1 K-means implementation.
-
 import sys
 import numpy as np
 import kmeans
@@ -9,7 +7,7 @@ np.random.seed(1234)
 
 
 def compare_clusterings(points, k):
-    # Return both silhouette scores and their adjusted Rand index.
+    # return silhouette scores and adjusted Rand index
     from sklearn.metrics import adjusted_rand_score, silhouette_score
 
     h = factorize(points, k)
@@ -23,7 +21,7 @@ def compare_clusterings(points, k):
 
 
 def main():
-    # Read k and a filename, then print the three required scores.
+    # get k and filename, print required scores
     try:
         if len(sys.argv) != 3:
             print("An Error Has Occurred")
