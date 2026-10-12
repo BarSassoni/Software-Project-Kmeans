@@ -28,7 +28,7 @@ static double distance_squared(double *a, double *b, int dim)
     return sum;
 }
 
-/* return symmetric similarity matrix (a zero diagonal) */
+/* symmetric similarity matrix 0's diag */
 double **sym(double **points, int n, int dim)
 {
     double **a;
@@ -51,7 +51,7 @@ double **sym(double **points, int n, int dim)
     return a;
 }
 
-/* sum rows to find degree */
+/*sum rows to find degree */
 static double *row_degrees(double **a, int n)
 {
     double *degrees;
@@ -101,7 +101,6 @@ double **norm(double **points, int n, int dim)
     double *degrees;
     int i;
     int j;
-
     a = sym(points, n, dim);
     if (a == NULL) {
         return NULL;
@@ -146,7 +145,7 @@ static void gram_matrix(double **h, double **gram, int n, int k)
     }
 }
 
-/* multiply row with column */
+/*multiply row with column */
 static double row_product(double *row, double **mat, int col, int length)
 {
     double sum;
@@ -192,7 +191,7 @@ static int update_h(double **h, double **next, double **w, double **gram, int n,
     return *change <= DBL_MAX;
 }
 
-/* copy values to target matrix */
+/* copy values to target matrix*/
 static void copy_matrix(double **source, double **target, int n, int k)
 {
     int i;
@@ -233,7 +232,7 @@ double **symnmf(double **h, double **w, int n, int k)
             current = NULL;
             break;
         }
-        /* use updated H and old matrix in next iteration */
+        /* use update H and old matrix in next iterr */
         tmp = current;
         current = next;
         next = tmp;
@@ -247,7 +246,7 @@ double **symnmf(double **h, double **w, int n, int k)
 }
 
 #ifndef SYMNMF_EXTENSION
-/* select matrix calculation */
+/* select matrix calc */
 static double **calculate_goal(char *goal, double **points, int n, int dim)
 {
     if (strcmp(goal, "sym") == 0) {
