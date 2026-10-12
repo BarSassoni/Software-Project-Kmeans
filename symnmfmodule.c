@@ -6,14 +6,14 @@
 
 typedef double **(*matrix_function)(double **, int, int);
 
-/* Use the same error message for every failure exposed to Python. */
+/* error message for python */
 static PyObject *set_error(PyObject *exception)
 {
     PyErr_SetString(exception, "An Error Has Occurred");
     return NULL;
 }
 
-/* Get positive matrix dimensions that fit the C interface. */
+/* get matrix dims for C interface */
 static int matrix_shape(PyObject *list, int *rows, int *cols)
 {
     PyObject *row;
@@ -43,9 +43,8 @@ static int matrix_shape(PyObject *list, int *rows, int *cols)
     return 1;
 }
 
-/* Copy a rectangular list, rejecting nonfinite or invalid values. */
-static int copy_values(PyObject *list, double **mat, int rows,
-                       int cols, int nonnegative)
+/* copy a rectangular list (with valid vals) */
+static int copy_values(PyObject *list, double **mat, int rows, int cols, int nonnegative)
 {
     PyObject *row;
     double value;
@@ -59,8 +58,7 @@ static int copy_values(PyObject *list, double **mat, int rows,
         }
         for (j = 0; j < cols; j++) {
             value = PyFloat_AsDouble(PyList_GET_ITEM(row, j));
-            if (PyErr_Occurred() || !(value >= -DBL_MAX &&
-                value <= DBL_MAX) || (nonnegative && value < 0.0)) {
+            if (PyErr_Occurred() || !(value >= -DBL_MAX && value <= DBL_MAX) || (nonnegative && value < 0.0)) {
                 set_error(PyExc_ValueError);
                 return 0;
             }
@@ -70,9 +68,8 @@ static int copy_values(PyObject *list, double **mat, int rows,
     return 1;
 }
 
-/* Allocate a C copy so the caller's Python input stays unchanged. */
-static double **read_matrix(PyObject *list, int *rows, int *cols,
-                            int nonnegative)
+/* allocating a C copy */
+static double **read_matrix(PyObject *list, int *rows, int *cols, int nonnegative)
 {
     double **mat;
 
@@ -91,7 +88,7 @@ static double **read_matrix(PyObject *list, int *rows, int *cols,
     return mat;
 }
 
-/* Create one Python row; list insertion takes ownership of each value. */
+/* make a python row */
 static PyObject *write_row(double *values, int cols)
 {
     PyObject *row, *value;
@@ -112,7 +109,7 @@ static PyObject *write_row(double *values, int cols)
     return row;
 }
 
-/* Convert a result to Python and release its C storage on every path. */
+/* convert a result to python (releasing matching C storage :) ) */
 static PyObject *write_matrix(double **mat, int rows, int cols)
 {
     PyObject *result, *row;
@@ -139,7 +136,7 @@ static PyObject *write_matrix(double **mat, int rows, int cols)
     return result;
 }
 
-/* Shared conversion and cleanup for the three graph matrices. */
+/* shared conversion and cleanup for graph matrices */
 static PyObject *calculate(PyObject *args, matrix_function function)
 {
     PyObject *list;
@@ -158,28 +155,28 @@ static PyObject *calculate(PyObject *args, matrix_function function)
     return write_matrix(result, n, n);
 }
 
-/* Return the similarity matrix. */
+/* return similarity matrix */
 static PyObject *py_sym(PyObject *self, PyObject *args)
 {
     (void)self;
     return calculate(args, sym);
 }
 
-/* Return the diagonal degree matrix. */
+/* return diagonal degree matrix */
 static PyObject *py_ddg(PyObject *self, PyObject *args)
 {
     (void)self;
     return calculate(args, ddg);
 }
 
-/* Return the normalized similarity matrix. */
+/* return norm similarity matrx */
 static PyObject *py_norm(PyObject *self, PyObject *args)
 {
     (void)self;
     return calculate(args, norm);
 }
 
-/* Validate H and W, then run the optimization in C. */
+/* check H and W vals and run optimization in C */
 static PyObject *py_symnmf(PyObject *self, PyObject *args)
 {
     PyObject *hlist, *wlist;
@@ -230,7 +227,7 @@ static struct PyModuleDef symnmfModule = {
     NULL
 };
 
-/* Initialize the Python extension module. */
+/* init python module */
 PyMODINIT_FUNC PyInit_symnmfmodule(void)
 {
     return PyModule_Create(&symnmfModule);
