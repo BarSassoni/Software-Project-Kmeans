@@ -160,8 +160,7 @@ static double row_product(double *row, double **mat, int col, int length)
 }
 
 /* simultaneou update, zeros stay zero */
-static int update_h(double **h, double **next, double **w, double **gram,
-                    int n, int k, double *change)
+static int update_h(double **h, double **next, double **w, double **gram, int n, int k, double *change)
 {
     int i;
     int j;
