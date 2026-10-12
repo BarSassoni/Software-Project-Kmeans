@@ -146,7 +146,7 @@ static void gram_matrix(double **h, double **gram, int n, int k)
     }
 }
 
-/* multiply row with column. */
+/* multiply row with column */
 static double row_product(double *row, double **mat, int col, int length)
 {
     double sum;
