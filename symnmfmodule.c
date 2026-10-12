@@ -3,7 +3,7 @@
 #include <float.h>
 #include <limits.h>
 #include "symnmf.h"
-
+/* pointer to matrix func */
 typedef double **(*matrix_function)(double **, int, int);
 
 /* error message for python */
@@ -18,7 +18,6 @@ static int matrix_shape(PyObject *list, int *rows, int *cols)
 {
     PyObject *row;
     Py_ssize_t n, dim;
-
     if (!PyList_Check(list)) {
         set_error(PyExc_ValueError);
         return 0;
@@ -49,7 +48,6 @@ static int copy_values(PyObject *list, double **mat, int rows, int cols, int non
     PyObject *row;
     double value;
     int i, j;
-
     for (i = 0; i < rows; i++) {
         row = PyList_GET_ITEM(list, i);
         if (!PyList_Check(row) || PyList_GET_SIZE(row) != cols) {
@@ -68,7 +66,7 @@ static int copy_values(PyObject *list, double **mat, int rows, int cols, int non
     return 1;
 }
 
-/* allocating a C copy */
+/* allocat a C copy */
 static double **read_matrix(PyObject *list, int *rows, int *cols, int nonnegative)
 {
     double **mat;
@@ -88,12 +86,11 @@ static double **read_matrix(PyObject *list, int *rows, int *cols, int nonnegativ
     return mat;
 }
 
-/* make a python row */
+/* make a python row*/
 static PyObject *write_row(double *values, int cols)
 {
     PyObject *row, *value;
     int j;
-
     row = PyList_New(cols);
     if (row == NULL) {
         return set_error(PyExc_MemoryError);
@@ -114,7 +111,6 @@ static PyObject *write_matrix(double **mat, int rows, int cols)
 {
     PyObject *result, *row;
     int i;
-
     if (mat == NULL) {
         return set_error(PyExc_RuntimeError);
     }
@@ -136,7 +132,7 @@ static PyObject *write_matrix(double **mat, int rows, int cols)
     return result;
 }
 
-/* shared conversion and cleanup for graph matrices */
+/*shared conversion and cleanup for graph matrices */
 static PyObject *calculate(PyObject *args, matrix_function function)
 {
     PyObject *list;
@@ -176,7 +172,7 @@ static PyObject *py_norm(PyObject *self, PyObject *args)
     return calculate(args, norm);
 }
 
-/* check H and W vals and run optimization in C */
+/* check H and W vals (nxk, nxn) and run optimization in C (also no memory leak) */
 static PyObject *py_symnmf(PyObject *self, PyObject *args)
 {
     PyObject *hlist, *wlist;
