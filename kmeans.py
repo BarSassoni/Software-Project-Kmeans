@@ -22,7 +22,6 @@ def closest_centroid(point, centroids):
             closestIndex = i
     return closestIndex
 
-
 def fit(points, k, max_iter=iters, eps=epsilon):
     # running HW1 Kmeans, starting from the first k input vectors
     centroids = [points[i][:] for i in range(k)]
