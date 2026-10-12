@@ -56,8 +56,8 @@ static int copy_values(PyObject *list, double **mat, int rows, int cols, int non
         }
         for (j = 0; j < cols; j++) {
             value = PyFloat_AsDouble(PyList_GET_ITEM(row, j));
-            if (PyErr_Occurred() || !(value >= -DBL_MAX && value <= DBL_MAX) || (nonnegative && value < 0.0)) {
-                set_error(PyExc_ValueError);
+        if (PyErr_Occurred() || value != value ||value > DBL_MAX || value < -DBL_MAX ||(nonnegative && value < 0.0)) {
+        set_error(PyExc_ValueError);
                 return 0;
             }
             mat[i][j] = value;
