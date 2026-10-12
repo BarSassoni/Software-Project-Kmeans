@@ -1,10 +1,9 @@
-# HW1 Kmeans code with minor changes (adjusted)
+# the HW1 kmeans code with small changes for this project
 
 import sys
 
 epsilon = 0.0001
 iters = 300
-
 
 def squared_distance(point, centroid):
     # calculate squared euclidean distance
@@ -30,7 +29,6 @@ def predict(points, centroids):
     # match vector to final centroid
     return [closest_centroid(point, centroids) for point in points]
 
-
 def update_centroids(points, centroids):
     # avg cluster, and keep old centroid for empty cluster
     clusters = [[] for _ in centroids]
@@ -50,7 +48,6 @@ def update_centroids(points, centroids):
             newCentroid.append(total / len(cluster))
         newCentroids.append(newCentroid)
     return newCentroids
-
 
 def fit(points, k, max_iter=iters, eps=epsilon):
     # running HW1 Kmeans, starting from the first k input vectors
@@ -96,7 +93,6 @@ def main():
     except Exception:
         print("An Error Has Occurred")
     return 1
-
 
 if __name__ == "__main__":
     sys.exit(main())
