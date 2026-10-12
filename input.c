@@ -13,7 +13,7 @@ typedef struct {
     int capacity;
 } Data;
 
-/* Increase the line buffer while leaving its old pointer valid on error. */
+/* increase line buffer */
 static int grow_line(char **line, size_t *capacity)
 {
     char *tmp;
@@ -32,7 +32,7 @@ static int grow_line(char **line, size_t *capacity)
     return 1;
 }
 
-/* Read a complete line; return 1 for a line, 0 for EOF, -1 for error. */
+/* read line, 1 for line, 0 for EOF, -1 for err */
 static int read_line(FILE *file, char **line, size_t *capacity)
 {
     size_t length;
@@ -61,11 +61,10 @@ static int read_line(FILE *file, char **line, size_t *capacity)
     return 1;
 }
 
-/* Commas determine the expected number of values on a row. */
+/* commas =num of vals on row */
 static int row_dimension(const char *line)
 {
     int dim;
-
     dim = 1;
     while (*line != '\0') {
         if (*line == ',') {
@@ -79,13 +78,12 @@ static int row_dimension(const char *line)
     return dim;
 }
 
-/* Parse exactly dim finite values, allowing whitespace around numbers. */
+/* dim finite values*/
 static int parse_row(char *line, double *row, int dim)
 {
     char *end;
     int i;
     double value;
-
     for (i = 0; i < dim; i++) {
         while (isspace((unsigned char)*line)) {
             line++;
@@ -113,7 +111,7 @@ static int parse_row(char *line, double *row, int dim)
     return 1;
 }
 
-/* Make room for one more data point. */
+/* space for data point */
 static int grow_points(Data *data)
 {
     double **tmp;
@@ -138,7 +136,7 @@ static int grow_points(Data *data)
     return 1;
 }
 
-/* Empty and whitespace-only lines do not contain data points. */
+/* empty lines dont have data points */
 static int blank_line(const char *line)
 {
     while (isspace((unsigned char)*line)) {
@@ -147,7 +145,7 @@ static int blank_line(const char *line)
     return *line == '\0';
 }
 
-/* Append a nonblank row after checking its shape and all its values. */
+/* add row after checkig its vals */
 static int append_row(Data *data, char *line)
 {
     double *row;
@@ -175,7 +173,7 @@ static int append_row(Data *data, char *line)
     return 1;
 }
 
-/* Read rectangular CSV data, including CRLF and a missing final newline. */
+/* read file data (CRLF and a missing final newline ) */
 double **read_points(const char *fileName, int *n, int *dim)
 {
     FILE *file;
@@ -183,7 +181,6 @@ double **read_points(const char *fileName, int *n, int *dim)
     char *line;
     size_t capacity;
     int status;
-
     file = fopen(fileName, "r");
     if (file == NULL) {
         return NULL;
@@ -213,12 +210,11 @@ double **read_points(const char *fileName, int *n, int *dim)
     return data.points;
 }
 
-/* Print one comma-separated matrix row per line. */
+/* print matrix row per line (with , ) */
 void print_matrix(double **mat, int rows, int cols)
 {
     int i;
     int j;
-
     for (i = 0; i < rows; i++) {
         for (j = 0; j < cols; j++) {
             if (j > 0) {
