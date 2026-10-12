@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "symnmf.h"
 
-/* Release the rows and the matrix itself. NULL is allowed. */
+/* release the rows and the matrix (null is allowed) */
 void free_matrix(double **mat, int rows)
 {
     int i;
@@ -15,7 +15,7 @@ void free_matrix(double **mat, int rows)
     free(mat);
 }
 
-/* Create a zero-filled matrix, cleaning up on allocation failure. */
+/* create a zero filled matrix */
 double **create_matrix(int rows, int cols)
 {
     double **mat;
