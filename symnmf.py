@@ -1,8 +1,5 @@
-import math
 import sys
 import numpy as np
-
-np.random.seed(1234)
 
 
 def isNumValid(text):
@@ -33,23 +30,13 @@ def parse_k(text, n=None):
 
 
 def read_points(lines):
-    # reading vectors ignoring empty lines
+    # read comma-separated vectors
     points = []
-    dimension = None
     for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-        point = [float(value) for value in line.split(",")]
-        if not all(math.isfinite(value) for value in point):
-            raise ValueError("Non-finite vector element")
-        if dimension is None:
-            dimension = len(point)
-        elif len(point) != dimension:
-            raise ValueError("Inconsistent vector dimension")
+        point = []
+        for value in line.split(","):
+            point.append(float(value))
         points.append(point)
-    if not points:
-        raise ValueError("Empty input")
     return points
 
 
@@ -64,6 +51,7 @@ def factorize(points, k):
     import symnmfmodule
 
     w = symnmfmodule.norm(points)
+    np.random.seed(1234)
     initialH = np.random.uniform(
         0, 2 * np.sqrt(np.mean(w) / k), (len(points), k)
     )

@@ -1,5 +1,3 @@
-#include <ctype.h>
-#include <float.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,9 +37,6 @@ static int read_line(FILE *file, char **line, size_t *capacity)
     int c;
     length = 0;
     while ((c = fgetc(file)) != EOF && c != '\n') {
-        if (c == '\0') {
-            return -1;
-        }
         if (length + 1 >= *capacity && !grow_line(line, capacity)) {
             return -1;
         }
@@ -67,9 +62,6 @@ static int row_dimension(const char *line)
     dim = 1;
     while (*line != '\0') {
         if (*line == ',') {
-            if (dim == INT_MAX) {
-                return 0;
-            }
             dim++;
         }
         line++;
@@ -77,38 +69,16 @@ static int row_dimension(const char *line)
     return dim;
 }
 
-/* dim finite values*/
-static int parse_row(char *line, double *row, int dim)
+/* convert the row's values to doubles */
+static void parse_row(char *line, double *row, int dim)
 {
-    char *end;
     int i;
-    double value;
     for (i = 0; i < dim; i++) {
-        while (isspace((unsigned char)*line)) {
+        row[i] = strtod(line, &line);
+        if (i + 1 < dim) {
             line++;
         }
-        if (*line == '\0') {
-            return 0;
-        }
-        value = strtod(line, &end);
-        /*a value != value for type check, other check for infin and fail conversion */
-        if (end == line || value != value || value > DBL_MAX || value < -DBL_MAX) {
-            return 0;
-        }
-        row[i] = value;
-        while (isspace((unsigned char)*end)) {
-            end++;
-        }
-        if (i + 1 < dim) {
-            if (*end != ',') {
-                return 0;
-            }
-            line = end + 1;
-        } else if (*end != '\0') {
-            return 0;
-        }
     }
-    return 1;
 }
 
 /* space for data point */
@@ -136,34 +106,22 @@ static int grow_points(Data *data)
     return 1;
 }
 
-/* empty lines dont have data points */
-static int blank_line(const char *line)
-{
-    while (isspace((unsigned char)*line)) {
-        line++;
-    }
-    return *line == '\0';
-}
-
-/* add row after checkig its vals */
+/* allocate and add a data point */
 static int append_row(Data *data, char *line)
 {
     double *row;
     int dim;
 
-    if (blank_line(line)) {
-        return 1;
-    }
     dim = row_dimension(line);
-    if (dim == 0 || (data->dim != 0 && dim != data->dim) ||
-        (size_t)dim > (size_t)-1 / sizeof(double)) {
+    if ((size_t)dim > (size_t)-1 / sizeof(double)) {
         return 0;
     }
     row = (double *)malloc((size_t)dim * sizeof(double));
     if (row == NULL) {
         return 0;
     }
-    if (!parse_row(line, row, dim) || !grow_points(data)) {
+    parse_row(line, row, dim);
+    if (!grow_points(data)) {
         free(row);
         return 0;
     }
@@ -201,7 +159,7 @@ double **read_points(const char *fileName, int *n, int *dim)
     if (fclose(file) != 0) {
         status = -1;
     }
-    if (status < 0 || data.n == 0) {
+    if (status < 0) {
         free_matrix(data.points, data.n);
         return NULL;
     }

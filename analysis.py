@@ -3,8 +3,6 @@ import numpy as np
 import kmeans
 from symnmf import factorize, parse_k, read_data
 
-np.random.seed(1234)
-
 
 def main():
     # get k and filename, print required scores

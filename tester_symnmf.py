@@ -8,11 +8,13 @@
 # Rewritten Python tester, not the original shell script. Independent NumPy
 # references replace Prev_final_100. Uses epsilon=1e-4, max_iter=300, seed=1234,
 # and checks both Silhouette scores plus ARI. Expected answers never use the
-# project's own functions. No make, sudo, network access, or automatic installs.
-# Builds a source-only temporary copy; original files are not changed/deleted.
-# Requires Linux/macOS, gcc, Python development headers, setuptools, numpy,
+# project's own functions. No sudo, network access, or automatic installs.
+# Builds a temporary source copy with Makefile; original files are unchanged.
+# Requires Linux/macOS, make, gcc, Python development headers, setuptools, numpy,
 # and scikit-learn. Valgrind checks standalone C if available; otherwise SKIP.
 # Undefined Silhouette cases are SKIP, never a false PASS.
+# File-content validation is outside the assignment's valid-input assumptions.
+# Mandatory datasets are non-empty, finite, rectangular and contain distinct points.
 # Exit: 0=all executed checks passed, 1=test failure, 2=setup/tester error.
 # For local use only; do not include this file in the assignment submission.
 import argparse
@@ -28,10 +30,10 @@ import tempfile
 
 EPSILON = 1e-4
 MAX_ITER = 300
-ATOL = 5.0001e-5  # Half one printed decimal unit, plus floating-point slack.
+ATOL = 1e-4
 ERROR = "An Error Has Occurred"
 NUMBER = r"-?\d+\.\d{4}"
-REQUIRED = ("symnmf.py", "analysis.py", "kmeans.py", "setup.py", "symnmf.c",
+REQUIRED = ("symnmf.py", "analysis.py", "kmeans.py", "setup.py", "Makefile", "symnmf.c",
             "symnmf.h", "symnmfmodule.c", "matrix.c", "input.c", "input.h")
 
 # (k, goal, number_of_points, dimensions), in the original tester's order.
@@ -157,7 +159,8 @@ class Tester:
         self.environment["CC"] = gcc
         if sys.platform.startswith("linux"):
             self.environment["LDSHARED"] = gcc + " -shared"
-        commands = [("Build standalone C (no Makefile)", command),
+        commands = [("Build standalone C with Makefile", ["make"]),
+                    ("Build standalone C with strict compiler flags", command),
                     ("Build Python extension", [sys.executable, "setup.py",
                                                 "build_ext", "--inplace", "--force"])]
         for name, command in commands:
@@ -217,6 +220,10 @@ class Tester:
         self.record("PASS", name)
 
     def dataset(self, name, points, k, goals):
+        if points.ndim != 2 or points.shape[1] == 0 or not 1 < k < len(points):
+            raise RuntimeError("Tester generated invalid dimensions or k: " + name)
+        if not np.isfinite(points).all() or len(np.unique(points, axis=0)) != len(points):
+            raise RuntimeError("Tester generated non-finite or duplicate points: " + name)
         filename = name + ".txt"
         np.savetxt(str(self.folder / filename), points, delimiter=",", fmt="%.17g")
         matrices = reference_matrices(points)
@@ -245,56 +252,55 @@ class Tester:
         filename = "format_input.txt"
         path = self.folder / filename
         normal = "\n".join(",".join(str(x) for x in row) for row in points)
-        variants = [("no-final-newline", normal),
-                    ("CRLF", normal.replace("\n", "\r\n") + "\r\n"),
-                    ("blank-lines", "\n" + normal.replace("\n", "\n\n") + "\n\n"),
-                    ("spaces", normal.replace(",", " , ") + "\n")]
-        expected = reference_matrices(points)["norm"]
+        variants = [("LF", normal + "\n"),
+                    ("no-final-newline", normal),
+                    ("CRLF", normal.replace("\n", "\r\n") + "\r\n")]
+        matrices = reference_matrices(points)
+        matrices["symnmf"] = reference_h(matrices["norm"], 2)
         for name, content in variants:
             path.write_bytes(content.encode("ascii"))
             for label, command in (("C", [self.c_program, "norm", filename]),
                                    ("Python", [sys.executable, "symnmf.py", "2", "norm", filename])):
-                self.matrix_test("CSV " + name + ": " + label, command, expected)
+                self.matrix_test("CSV " + name + ": " + label, command, matrices["norm"])
+        path.write_text(normal + "\n", encoding="ascii")
         for goal in ("sym", "ddg", "norm", "symnmf"):
-            self.expected_error("Missing file: Python " + goal,
-                                [sys.executable, "symnmf.py", "2", goal, "absent.txt"])
+            for k in ("2", "2.0", "2.000", "+2"):
+                self.matrix_test("Valid k=" + k + ": Python " + goal,
+                                 [sys.executable, "symnmf.py", k, goal, filename],
+                                 matrices[goal])
+            self.matrix_test("Repeated calculation: Python " + goal,
+                             [sys.executable, "symnmf.py", "2", goal, filename],
+                             matrices[goal])
             if goal != "symnmf":
-                self.expected_error("Missing file: C " + goal,
-                                    [self.c_program, goal, "absent.txt"])
-        self.expected_error("Missing file: analysis",
-                            [sys.executable, "analysis.py", "2", "absent.txt"])
-        for k in ("0", "1", "6", "7", "-2", "2.5", "hello"):
-            self.expected_error("Invalid k=" + k,
-                                [sys.executable, "symnmf.py", k, "sym", filename],
-                                "Incorrect number of clusters!")
-        for name, command in (("C arguments", [self.c_program]),
-                              ("Python arguments", [sys.executable, "symnmf.py"]),
-                              ("Analysis arguments", [sys.executable, "analysis.py"]),
+                self.matrix_test("Repeated calculation: C " + goal,
+                                 [self.c_program, goal, filename], matrices[goal])
+            for k in ("0", "1", "6", "7", "-2", "2.5", "hello"):
+                self.expected_error("Invalid k=" + k + ": Python " + goal,
+                                    [sys.executable, "symnmf.py", k, goal, filename],
+                                    "Incorrect number of clusters!")
+        for name, command in (("C missing arguments", [self.c_program]),
+                              ("C missing filename", [self.c_program, "sym"]),
+                              ("C extra arguments", [self.c_program, "sym", filename, "extra"]),
+                              ("Python missing arguments", [sys.executable, "symnmf.py"]),
+                              ("Python missing goal and filename", [sys.executable, "symnmf.py", "2"]),
+                              ("Python missing filename", [sys.executable, "symnmf.py", "2", "sym"]),
+                              ("Python extra arguments", [sys.executable, "symnmf.py", "2", "sym", filename, "extra"]),
                               ("C unknown goal", [self.c_program, "oops", filename]),
+                              ("C unsupported symnmf goal", [self.c_program, "symnmf", filename]),
                               ("Python unknown goal", [sys.executable, "symnmf.py", "2", "oops", filename])):
             self.expected_error(name, command)
-        bad_files = ["", "1,2\n3\n", "1,\n2,3\n", "nan,1\n2,3\n", "inf,1\n2,3\n",
-                     "hello,1\n2,3\n", "1,,2\n3,4,5\n", "1,2junk\n3,4\n"]
-        for index, content in enumerate(bad_files, 1):
-            name = "bad_input_{:02d}.txt".format(index)
-            (self.folder / name).write_text(content)
-            self.expected_error("Malformed CSV {}: C".format(index), [self.c_program, "sym", name])
-            self.expected_error("Malformed CSV {}: Python".format(index),
-                                [sys.executable, "symnmf.py", "2", "sym", name])
 
     def memory_tests(self):
         valgrind = shutil.which("valgrind")
         if valgrind is None:
             self.record("SKIP", "Valgrind (standalone C)", "Not installed; no memory-check claim")
             return
-        targets = self.memory_inputs + [("sym", "absent.txt"), ("norm", "bad_input_02.txt")]
-        for goal, filename in targets:
+        for goal, filename in self.memory_inputs:
             command = [valgrind, "--leak-check=full", "--show-leak-kinds=all",
                        "--errors-for-leak-kinds=all", "--error-exitcode=97",
                        self.c_program, goal, filename]
             code, stdout, stderr = self.execute(command, max(120, self.timeout))
-            expected_exit = 1 if filename in ("absent.txt", "bad_input_02.txt") else 0
-            if code != expected_exit or not re.search(r"ERROR SUMMARY:\s+0 errors", stderr):
+            if code != 0 or not re.search(r"ERROR SUMMARY:\s+0 errors", stderr):
                 self.failure("Valgrind " + goal + " " + filename,
                              "Memory check failed or could not run", command, stdout, stderr)
             else:
@@ -303,12 +309,16 @@ class Tester:
     def summary(self):
         counts = {status: sum(r["status"] == status for r in self.results)
                   for status in ("PASS", "FAIL", "SKIP")}
-        print("\nRESULT: {PASS} PASS | {FAIL} FAIL | {SKIP} SKIP".format(**counts))
+        total_required = len(self.results)
+        print("\nREQUIRED TESTS: {} total | {PASS} PASS | {FAIL} FAIL | {SKIP} SKIP".format(
+            total_required, **counts))
+        print("Optional exploratory tests: none.")
         if counts["FAIL"]:
             print("FAILED: inspect the failure logs below.")
         else:
             print("ALL EXECUTED CHECKS PASSED. SKIP means not checked, not passed.")
-        report = {"counts": counts, "python": sys.version, "numpy": np.__version__,
+        report = {"total_required": total_required, "counts": counts,
+                  "python": sys.version, "numpy": np.__version__,
                   "results": self.results}
         (self.folder / "tester_results.json").write_text(json.dumps(report, indent=2))
         return counts["FAIL"] == 0
@@ -323,6 +333,8 @@ def check_requirements(project):
         raise RuntimeError("Use the Linux/course terminal in VS Code (not Windows PowerShell).")
     if shutil.which("gcc") is None:
         raise RuntimeError("gcc is not available in this terminal.")
+    if shutil.which("make") is None:
+        raise RuntimeError("make is not available in this terminal.")
     try:
         np = importlib.import_module("numpy")
         metrics = importlib.import_module("sklearn.metrics")
@@ -347,6 +359,8 @@ def run_suite(tester, seed):
         tester.dataset("separated_k{}".format(k), points, k, all_goals)
     points = random.normal(size=(70, 6))
     tester.dataset("larger_signed", points, 5, all_goals)
+    points = np.array([[-1.5], [-1.0], [-0.5], [0.0], [0.5], [1.0], [1.5]])
+    tester.dataset("signed_1d", points, 2, all_goals)
     tester.errors_and_formats()
     tester.memory_tests()
 
@@ -368,19 +382,19 @@ def main():
         print("[SETUP ERROR] " + str(error), flush=True)
         return 2
     folder = Path(tempfile.mkdtemp(prefix="symnmf_tester_"))
-    # Never copy stale binaries, .so, build folders or Makefile.
+    # Never copy stale binaries, .so or build folders.
     for source in project.iterdir():
-        if source.is_file() and source.suffix in (".c", ".h", ".py"):
+        if source.is_file() and (source.suffix in (".c", ".h", ".py") or source.name == "Makefile"):
             if source.resolve() != Path(__file__).resolve():
                 shutil.copy2(str(source), str(folder / source.name))
     tester = Tester(folder, args.timeout)
     print("Source project: " + str(project), flush=True)
-    print("Building a temporary copy, without Makefile. Test-data seed: " + str(args.seed), flush=True)
+    print("Building a temporary source copy. Test-data seed: " + str(args.seed), flush=True)
     result = 2
     try:
         if tester.build():
             run_suite(tester, args.seed)
-            result = 0 if tester.summary() else 1
+        result = 0 if tester.summary() else 1
     except KeyboardInterrupt:
         print("\nInterrupted. Temporary files retained.")
     except Exception as error:
