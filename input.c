@@ -12,6 +12,7 @@ typedef struct {
 } Data;
 
 /* increase linebuffer */
+/* input: line, capacity; output: success flag */
 static int grow_line(char **line, size_t *capacity)
 {
     char *tmp;
@@ -31,6 +32,7 @@ static int grow_line(char **line, size_t *capacity)
 }
 
 /* read line, 1 for line, 0 for EOF, -1 for err */
+/* input: file, line, capacity; output: line status */
 static int read_line(FILE *file, char **line, size_t *capacity)
 {
     size_t length;
@@ -56,6 +58,7 @@ static int read_line(FILE *file, char **line, size_t *capacity)
 }
 
 /* commas =num of vals on row */
+/* input: line; output: dimension */
 static int row_dimension(const char *line)
 {
     int dim;
@@ -70,6 +73,7 @@ static int row_dimension(const char *line)
 }
 
 /* convert the row's values to doubles */
+/* input: line, row, dim; output: fills row */
 static void parse_row(char *line, double *row, int dim)
 {
     int i;
@@ -82,6 +86,7 @@ static void parse_row(char *line, double *row, int dim)
 }
 
 /* space for data point */
+/* input: data; output: success flag */
 static int grow_points(Data *data)
 {
     double **tmp;
@@ -107,6 +112,7 @@ static int grow_points(Data *data)
 }
 
 /* allocate and add a data point */
+/* input: data, line; output: success flag */
 static int append_row(Data *data, char *line)
 {
     double *row;
@@ -132,6 +138,7 @@ static int append_row(Data *data, char *line)
 }
 
 /* read file data (CRLF and a missing final newline ) */
+/* input: fileName; output: points, n, dim */
 double **read_points(const char *fileName, int *n, int *dim)
 {
     FILE *file;
@@ -169,6 +176,7 @@ double **read_points(const char *fileName, int *n, int *dim)
 }
 
 /* print matrix row per line (with , ) */
+/* input: mat, rows, cols; output: prints matrix */
 void print_matrix(double **mat, int rows, int cols)
 {
     int i;

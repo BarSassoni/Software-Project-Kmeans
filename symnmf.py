@@ -4,6 +4,7 @@ import numpy as np
 
 def isNumValid(text):
     # check if num is valid
+    # input: text; output: integer or None
     if text.startswith("+"):
         text = text[1:]
     whole, _, fraction = text.partition(".")
@@ -23,6 +24,7 @@ def isNumValid(text):
 
 def parse_k(text, n=None):
     # check if k is valid (as in HW1)
+    # input: text, n; output: k or None
     k = isNumValid(text)
     if k is None or k <= 1 or (n is not None and k >= n):
         return None
@@ -31,6 +33,7 @@ def parse_k(text, n=None):
 
 def read_points(lines):
     # read comma-separated vectors
+    # input: lines; output: list of points
     points = []
     for line in lines:
         point = []
@@ -42,12 +45,14 @@ def read_points(lines):
 
 def read_data(file_name):
     # load vectors from file
+    # input: file_name; output: list of points
     with open(file_name, "r") as inputFile:
         return read_points(inputFile)
 
 
 def factorize(points, k):
     # create H and optimize using C module
+    # input: points, k; output: optimized H matrix
     import symnmfmodule
 
     w = symnmfmodule.norm(points)
@@ -60,12 +65,14 @@ def factorize(points, k):
 
 def print_matrix(matrix):
     # print the matrix
+    # input: matrix; output: prints matrix
     for row in matrix:
         print(",".join("%.4f" % value for value in row))
 
 
 def main():
     # get input and print the matrix
+    # input: command arguments; output: exit status
     try:
         if len(sys.argv) != 4:
             print("An Error Has Occurred")

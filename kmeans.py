@@ -6,6 +6,7 @@ iters = 300
 
 def squared_distance(point, centroid):
     # calculate squared euclidean distance
+    # input: point, centroid; output: squared distance
     distance = 0.0
     for j in range(len(point)):
         distance += (point[j] - centroid[j]) ** 2
@@ -13,6 +14,7 @@ def squared_distance(point, centroid):
 
 def closest_centroid(point, centroids):
     # return the first closest centroid
+    # input: point, centroids; output: centroid index
     closestIndex = 0
     closestDistance = squared_distance(point, centroids[0])
     for i in range(1, len(centroids)):
@@ -24,6 +26,7 @@ def closest_centroid(point, centroids):
 
 def fit(points, k, max_iter=iters, eps=epsilon):
     # running HW1 Kmeans, starting from the first k input vectors
+    # input: points, k, max_iter, eps; output: final centroids
     centroids = [points[i][:] for i in range(k)]
     for _ in range(max_iter):
         clusters = [[] for _ in centroids]
@@ -55,6 +58,7 @@ def fit(points, k, max_iter=iters, eps=epsilon):
 
 def main():
     # keep HW1 stdin interface, with project defaults for convergence
+    # input: command arguments; output: exit status
     from symnmf import isNumValid, parse_k
     from symnmf import print_matrix, read_points
 

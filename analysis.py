@@ -6,6 +6,7 @@ from symnmf import factorize, parse_k, read_data
 
 def main():
     # get k and filename, print required scores
+    # input: command arguments; output: exit status
     try:
         if len(sys.argv) != 3:
             print("An Error Has Occurred")

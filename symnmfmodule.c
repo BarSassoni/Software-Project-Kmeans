@@ -7,6 +7,7 @@
 typedef double **(*matrix_function)(double **, int, int);
 
 /* error message for python */
+/* input: exception; output: sets error, returns NULL */
 static PyObject *set_error(PyObject *exception)
 {
     PyErr_SetString(exception, "An Error Has Occurred");
@@ -14,6 +15,7 @@ static PyObject *set_error(PyObject *exception)
 }
 
 /* get matrix dims for C interface */
+/* input: list, rows, cols; output: dimensions and success */
 static int matrix_shape(PyObject *list, int *rows, int *cols)
 {
     PyObject *row;
@@ -43,6 +45,7 @@ static int matrix_shape(PyObject *list, int *rows, int *cols)
 }
 
 /* allocat a C copy */
+/* input: list, rows, cols, nonnegative; output: C matrix */
 static double **read_matrix(PyObject *list, int *rows, int *cols, int nonnegative)
 {
     double **mat;
@@ -80,6 +83,7 @@ static double **read_matrix(PyObject *list, int *rows, int *cols, int nonnegativ
 }
 
 /* convert a result to python (releasing matching C storage :) ) */
+/* input: mat, rows, cols; output: Python matrix */
 static PyObject *write_matrix(double **mat, int rows, int cols)
 {
     PyObject *result, *row, *value;
@@ -115,6 +119,7 @@ static PyObject *write_matrix(double **mat, int rows, int cols)
 }
 
 /*shared conversion and cleanup for graph matrices */
+/* input: args, function; output: Python result matrix */
 static PyObject *calculate(PyObject *args, matrix_function function)
 {
     PyObject *list;
@@ -134,6 +139,7 @@ static PyObject *calculate(PyObject *args, matrix_function function)
 }
 
 /* return similarity matrix */
+/* input: self, args; output: similarity matrix */
 static PyObject *py_sym(PyObject *self, PyObject *args)
 {
     (void)self;
@@ -141,6 +147,7 @@ static PyObject *py_sym(PyObject *self, PyObject *args)
 }
 
 /* return diagonal degree matrix */
+/* input: self, args; output: diagonal degree matrix */
 static PyObject *py_ddg(PyObject *self, PyObject *args)
 {
     (void)self;
@@ -148,6 +155,7 @@ static PyObject *py_ddg(PyObject *self, PyObject *args)
 }
 
 /* return norm similarity matrx */
+/* input: self, args; output: normalized similarity matrix */
 static PyObject *py_norm(PyObject *self, PyObject *args)
 {
     (void)self;
@@ -155,6 +163,7 @@ static PyObject *py_norm(PyObject *self, PyObject *args)
 }
 
 /* check H and W vals (nxk, nxn) and optimization in C */
+/* input: self, args; output: optimized H matrix */
 static PyObject *py_symnmf(PyObject *self, PyObject *args)
 {
     PyObject *hlist, *wlist;
@@ -206,6 +215,7 @@ static struct PyModuleDef symnmfModule = {
 };
 
 /* init python module */
+/* input: none; output: Python module */
 PyMODINIT_FUNC PyInit_symnmfmodule(void)
 {
     return PyModule_Create(&symnmfModule);

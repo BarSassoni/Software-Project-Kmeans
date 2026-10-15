@@ -2,6 +2,7 @@
 #include "symnmf.h"
 
 /* release the rows and the matrix (null is allowed) */
+/* input: mat, rows; output: frees matrix */
 void free_matrix(double **mat, int rows)
 {
     int i;
@@ -16,6 +17,7 @@ void free_matrix(double **mat, int rows)
 }
 
 /* create a zero filled matrix */
+/* input: rows, cols; output: zero matrix */
 double **create_matrix(int rows, int cols)
 {
     double **mat;

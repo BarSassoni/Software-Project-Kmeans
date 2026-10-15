@@ -14,6 +14,7 @@
 #define BETA 0.5
 
 /* symmetric similarity matrix 0's diag */
+/* input: points, n, dim; output: similarity matrix */
 double **sym(double **points, int n, int dim)
 {
     double **a;
@@ -44,6 +45,7 @@ double **sym(double **points, int n, int dim)
 }
 
 /*sum rows to find degree */
+/* input: a, n; output: row degrees */
 static double *row_degrees(double **a, int n)
 {
     double *degrees;
@@ -63,6 +65,7 @@ static double *row_degrees(double **a, int n)
 }
 
 /* return diagonal matrix with similarity row sums */
+/* input: points, n, dim; output: degree matrix */
 double **ddg(double **points, int n, int dim)
 {
     double **d;
@@ -87,6 +90,7 @@ double **ddg(double **points, int n, int dim)
 }
 
 /* zero degrees, leave zero row or column */
+/* input: points, n, dim; output: normalized matrix */
 double **norm(double **points, int n, int dim)
 {
     double **a;
@@ -118,6 +122,7 @@ double **norm(double **points, int n, int dim)
 }
 
 /* calculation H^t * H */
+/* input: h, gram, n, k; output: fills gram */
 static void gram_matrix(double **h, double **gram, int n, int k)
 {
     int i;
@@ -138,6 +143,7 @@ static void gram_matrix(double **h, double **gram, int n, int k)
 }
 
 /*multiply row with col */
+/* input: row, mat, col, length; output: dot product */
 static double row_product(double *row, double **mat, int col, int length)
 {
     double sum;
@@ -151,6 +157,7 @@ static double row_product(double *row, double **mat, int col, int length)
 }
 
 /* simultaneou update and zeros stay zeros */
+/* input: h, next, w, gram, n, k, change; output: success, next, change */
 static int update_h(double **h, double **next, double **w, double **gram, int n, int k, double *change)
 {
     int i;
@@ -184,6 +191,7 @@ static int update_h(double **h, double **next, double **w, double **gram, int n,
 }
 
 /*copy values to target matrix */
+/* input: source, target, n, k; output: fills target */
 static void copy_matrix(double **source, double **target, int n, int k)
 {
     int i;
@@ -197,6 +205,7 @@ static void copy_matrix(double **source, double **target, int n, int k)
 }
 
 /* return new H */
+/* input: h, w, n, k; output: new H */
 double **symnmf(double **h, double **w, int n, int k)
 {
     double **current;
@@ -239,6 +248,7 @@ double **symnmf(double **h, double **w, int n, int k)
 
 #ifndef SYMNMF_EXTENSION
 /* select matrix calc */
+/* input: goal, points, n, dim; output: goal matrix */
 static double **calculate_goal(char *goal, double **points, int n, int dim)
 {
     if (strcmp(goal, "sym") == 0) {
@@ -254,6 +264,7 @@ static double **calculate_goal(char *goal, double **points, int n, int dim)
 }
 
 /* read data, calculate goal and print 4 decimal places */
+/* input: argc, argv; output: exit status */
 int main(int argc, char *argv[])
 {
     double **points;
